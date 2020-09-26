@@ -16,19 +16,19 @@ def help(message):
 	
 if __name__ == '__main__':	
 	dict_of_funcs = {}
-	globals_copy = globals()
+	globals_copy = globals().copy()
 	for key in globals_copy:
 		if(isinstance(globals_copy[key], FunctionType)):
         	dict_of_funcs[key] = globals_copy[key].__defaults__ #составляем словарь функций и их описаний
 	help_message = ""
 	for func in dict_of_funcs:
-		help_message+= f"{func} —— {dict_of_funcs{func}'\n'" #создаём сообщение для команды /help со всеми командами и их кратким описанием
+		help_message+= f"{func} —— {dict_of_funcs[func]}'\n'" #создаём сообщение для команды /help со всеми командами и их кратким описанием
 												  
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
 		try:
-			function = globals()[function_name]
+			function = globals_copy[function_name]
 			function(message)
 		except KeyError:
 			bot.send_message(message.chat.id, "Неизвестная команда. Напишите команду '/help' для списка команд") #если пользователь написал существующую функцию, выполняем её
