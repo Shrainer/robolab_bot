@@ -1,14 +1,21 @@
 import telebot
 from types import FunctionType
+from nasa_api import get_photo, get_wheather
 
 token = 'token'
 bot = telebot.Telebot(token)
 
-def start(messsage, description = "Описание 1"):
-	pass
+def start(messsage, description = "Приветствие"):
+	bot.send_message(message.chat.id, "Привет, спасибо, что написал мне)))")
 
-def stop(message, description = "Описание 2"):
-	pass
+def weather(message, description = "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"):
+	average_temperature = get_wheather()
+	bot.send_message(message.chat.id, f"Сегогдняшняя средняя температура на Марсе: {average_temperature}C")
+	
+def photo(message, description = "Получить свежую фотку с Марса, но не в hd :/"):
+	explanation, picture = get_photo()
+	bot.send_photo(message.chat.id, picture)
+	bot.send_message(message.chat.id, explanation)
 
 def help(message):
 	global help_message
