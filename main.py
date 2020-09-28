@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	help_message = ""
 	for func in dict_of_funcs:
 		if(func != 'help'):
-			help_message+= f"{func} —— {dict_of_funcs[func][description_position]}'\n'"
+			help_message+= f"{func} —— {dict_of_funcs[func][description_position]}\n"
 		#создаём сообщение для команды /help со всеми командами и их кратким описанием
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
