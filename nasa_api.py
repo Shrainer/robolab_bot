@@ -23,3 +23,4 @@ def get_weather():
 			return data[i]["AT"], data[i]["HWS"]
 	result = get_data(data)
 	return result[0]['av']
+#Tabs – 4
