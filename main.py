@@ -4,12 +4,15 @@ from types import FunctionType
 token = 'token'
 bot = telebot.TeleBot(token)
 
+
 def start(message, description = "Приветствие"):
 	bot.send_message(message.chat.id, "Привет, спасибо, что написал мне)))")
+
 
 def weather(message, description = "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"):
 	average_temperature = get_weather()
 	bot.send_message(message.chat.id, f"Сегогдняшняя средняя температура на Марсе: {average_temperature}C")
+
 
 def photo(message, description = "Получить свежую фотку с Марса, но не в hd :/"):
 	explanation = get_photo()
@@ -18,9 +21,11 @@ def photo(message, description = "Получить свежую фотку с М
 		picture.close()
 	bot.send_message(message.chat.id, explanation)
 
+
 def help(message):
 	global help_message
 	bot.send_message(message.chat.id, help_message)
+
 
 if __name__ == '__main__':
 	dict_of_funcs = {}
