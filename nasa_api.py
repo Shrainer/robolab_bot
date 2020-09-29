@@ -20,10 +20,7 @@ def get_photo():
 
 def get_weather():
     data = api.mars_weather()
-    def	get_data(data):
         for i in data:
-            return data[i]["AT"], data[i]["HWS"]
-    result = get_data(data)
-    return result[0]['av']
+            return data[i]["AT"]['av']
 
 #Tabs – 4 хватит
