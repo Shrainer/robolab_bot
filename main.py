@@ -12,10 +12,8 @@ def weather(message, description = "Получить данные о погод�
 	bot.send_message(message.chat.id, f"Сегогдняшняя средняя температура на Марсе: {average_temperature}C")
 
 def photo(message, description = "Получить свежую фотку с Марса, но не в hd :/"):
-	explanation = get_photo()
-	with open('picture.jpg', 'rb') as picture:
-		bot.send_photo(message.chat.id, picture)
-	bot.send_message(message.chat.id, explanation)
+	url_to_media = get_media()
+	bot.send_message(message.chat.id, url_to_media)
 
 def help(message, description = "Функция HELP поможет вам всегда"):
 	global help_message

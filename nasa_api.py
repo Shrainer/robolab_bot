@@ -1,22 +1,10 @@
-import nasapy, urllib
-from time import strftime, gmtime
+import nasapy
 
 api = nasapy.Nasa(key = 'key')
-flag = False
 
-def get_photo():
-    global flag
-    picture = api.picture_of_the_day()
-    date_of_photo = picture['date']
-    text = picture['explanation']
-    today_day = strftime("%Y-%m-%d", gmtime())
-    if(date_of_photo != today_day or flag == False):
-        flag = True
-        with open('picture.jpg', 'wb') as photo:
-            url_to_photo = picture['url']
-            photo.write(urllib.request.urlopen(url_to_photo).read())
-            photo.close()
-    return text
+def get_media():
+    media = api.picture_of_the_day()
+    return url_to_media = media['url']
 
 def get_weather():
     data = api.mars_weather()
