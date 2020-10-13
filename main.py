@@ -15,6 +15,18 @@ def photo(message, description = "Получить свежую фотку с М
 	url_to_media = get_media()
 	bot.send_message(message.chat.id, url_to_media)
 
+def earth(message, description = "asassadasd"):
+	url_to_photo, flag = earth_photo()
+	bot.send_message(message.chat.id, url_to_photo)
+	if(flag): bot.send_message(message.chat.id, "Не было сегодняшнего фото, отправил старое")
+
+def rover(message, description = "assaa"):
+	photos = rover_photo()
+	message_text = ""
+	for url in list(photos):
+		message_text+= url + '\n'
+	bot.send_message(message.chat.id, message_text)
+
 def help(message, description = "Функция HELP поможет вам всегда"):
 	global help_message
 	bot.send_message(message.chat.id, help_message)
@@ -30,7 +42,7 @@ def main():
 	for func in dict_of_funcs:
 		if(func not in ('main', 'error_handler')):
 			help_message+= f"{func} —— {dict_of_funcs[func][description_position]}\n"
-	from nasa_api import get_photo, get_weather
+	from nasa_api import get_weather, get_media, earth_photo, rover_photo
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]

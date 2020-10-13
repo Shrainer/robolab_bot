@@ -12,18 +12,17 @@ def get_weather():
     for i in data:
         return data[i]["AT"]['av']
 
-def earth_photo(date = strftime("%Y-%m-%d", gmtime())):
+def earth_photo(date = strftime("%Y-%m-%d", gmtime()), flag = False):
     year = date[:4]
     month = date[5:7]
     day = date[8:10]
     epic_photos = api.epic(date = date)
     if not(epic_photos):
-        print("Нету нового фото, отправляю вчерашнее")
-        return earth_photo(strftime("%Y-%m-%d", gmtime(time() - 86400)))
+        return earth_photo(strftime("%Y-%m-%d", gmtime(time() - 86400)), True)
     else:
         photo_name = epic_photos[0]['image']
         url_to_image = f"https://epic.gsfc.nasa.gov/archive/natural/{year}/{month}/{day}/jpg/{photo_name}.jpg"
-        return url_to_image
+        return url_to_image, flag
 
 def rover_photo():
     today_date = strftime("%Y-%m-%d", gmtime())
