@@ -1,53 +1,50 @@
 import telebot
 from types import FunctionType
+from nasa_api import get_weather, get_media, earth_photo, rover_photo
 
 token = 'token'
 bot = telebot.TeleBot(token)
 
-def start(message, description = "Приветствие"):
+def start(message):
 	bot.send_message(message.chat.id, "Привет, спасибо, что написал мне)))")
 
-def weather(message, description = "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"):
+def weather(message):
 	average_temperature = get_weather()
 	bot.send_message(message.chat.id, f"Сегогдняшняя средняя температура на Марсе: {average_temperature}C")
 
-def photo(message, description = "Получить свежую фотку с Марса, но не в hd :/"):
+def photo(message):
 	url_to_media = get_media()
 	bot.send_message(message.chat.id, url_to_media)
 
-def earth(message, description = "asassadasd"):
+def earth(message):
 	url_to_photo, flag = earth_photo()
 	bot.send_message(message.chat.id, url_to_photo)
 	if(flag): bot.send_message(message.chat.id, "Не было сегодняшнего фото, отправил старое")
 
-def rover(message, description = "assaa"):
+def rover(message):
 	photos = rover_photo()
 	message_text = ""
 	for url in list(photos):
 		message_text+= url + '\n'
 	bot.send_message(message.chat.id, message_text)
 
-def help(message, description = "Функция HELP поможет вам всегда"):
+def help(message):
 	global help_message
 	bot.send_message(message.chat.id, help_message)
 
 def main():
-	dict_of_funcs = {}
-	description_position = 0
-	globals_copy = globals().copy()
-	for key in globals_copy:
-		if(isinstance(globals_copy[key], FunctionType)):
-			dict_of_funcs[key] = globals_copy[key].__defaults__
+	dict_of_funcs = {"start":(start, "Приветствие"), "weather":(weather, "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"),
+	"photo":(photo, "Получить свежую фотку с Марса, но не в hd :/"), "earth":(earth, "Фотка Земли со спуника НАСА"), "rover":(rover, "Фотки с ровера какого-то"),
+	"help":(help, "Функция HELP поможет вам всегда")}
 	help_message = ""
 	for func in dict_of_funcs:
 		if(func not in ('main', 'error_handler')):
-			help_message+= f"{func} —— {dict_of_funcs[func][description_position]}\n"
-	from nasa_api import get_weather, get_media, earth_photo, rover_photo
+			help_message+= f"{func} —— {dict_of_funcs[func][1]}\n"
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
 		try:
-			function = globals_copy[function_name]
+			function = dict_of_funcs[function_name][0]
 			function(message)
 		except KeyError:
 			bot.send_message(message.chat.id, "Неизвестная команда. Напишите команду '/help' для списка команд")
