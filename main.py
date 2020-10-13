@@ -17,22 +17,27 @@ def photo(message):
 	bot.send_message(message.chat.id, url_to_media)
 
 def earth(message):
-	url_to_photo, flag = earth_photo()
+	url_to_photo, flag, date = earth_photo()
 	bot.send_message(message.chat.id, url_to_photo)
-	if(flag): bot.send_message(message.chat.id, "Не было сегодняшнего фото, отправил старое")
+	if(flag): bot.send_message(message.chat.id, f"Не было сегодняшнего фото, отправил за {date}")
 
 def rover(message):
-	photos = rover_photo()
+	photos, flag, date = rover_photo()
 	message_text = ""
 	for url in list(photos):
-		message_text+= url + '\n'
+		if(len(message_text + url) + 1 <= 4096):
+			message_text+= url + '\n'
+		else:
+			break
 	bot.send_message(message.chat.id, message_text)
+	if(flag): bot.send_message(message.chat.id, f"Это фотографии от {date}")
 
 def help(message):
 	global help_message
 	bot.send_message(message.chat.id, help_message)
 
 def main():
+	global help_message
 	dict_of_funcs = {"start":(start, "Приветствие"), "weather":(weather, "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"),
 	"photo":(photo, "Получить свежую фотку с Марса, но не в hd :/"), "earth":(earth, "Фотка Земли со спуника НАСА"), "rover":(rover, "Фотки с ровера какого-то"),
 	"help":(help, "Функция HELP поможет вам всегда")}
@@ -58,5 +63,4 @@ def error_handler(func):
 		pass
 
 if __name__ == '__main__':
-	@error_handler
 	main()
