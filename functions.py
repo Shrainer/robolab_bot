@@ -2,7 +2,7 @@ import nasapy, requests, json
 from time import strftime, gmtime, time
 from random import random, randint
 
-api_key = 'u76ZsSAKzdqxj9zODDD4BxDOflOpMgmC4bUblFvo'
+api_key = 'key'
 api = nasapy.Nasa(key = api_key)
 
 def get_media():
