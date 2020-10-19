@@ -1,66 +1,44 @@
 import telebot
 from types import FunctionType
-from nasa_api import get_weather, get_media, earth_photo, rover_photo
+from functions import *
 
 token = 'token'
 bot = telebot.TeleBot(token)
 
-def start(message):
-	bot.send_message(message.chat.id, "Привет, спасибо, что написал мне)))")
+def error_handler(func):
+	def wrapper(*args):
+		try:
+			func(*args)
+		except Exception as error:
+			print(f"Произошла ошибка: {error}")
+	return wrapper
 
-def weather(message):
-	average_temperature = get_weather()
-	bot.send_message(message.chat.id, f"Сегогдняшняя средняя температура на Марсе: {average_temperature}C")
+def type_and_reply(chat_id, text, step_handler):
+	message = bot.send_message(chat_id, text)
+	if(step_handler):
+		global handler_function
+		handler_function = step_handler
+		bot.register_next_step_handler(message, register_step)
 
-def photo(message):
-	url_to_media = get_media()
-	bot.send_message(message.chat.id, url_to_media)
-
-def earth(message):
-	url_to_photo, flag, date = earth_photo()
-	bot.send_message(message.chat.id, url_to_photo)
-	if(flag): bot.send_message(message.chat.id, f"Не было сегодняшнего фото, отправил за {date}")
-
-def rover(message):
-	photos, flag, date = rover_photo()
-	message_text = ""
-	for url in list(photos):
-		if(len(message_text + url) + 1 <= 4096):
-			message_text+= url + '\n'
-		else:
-			break
-	bot.send_message(message.chat.id, message_text)
-	if(flag): bot.send_message(message.chat.id, f"Это фотографии от {date}")
-
-def help(message):
-	global help_message
-	bot.send_message(message.chat.id, help_message)
+@error_handler
+def register_step(message):
+	global handler_function
+	text = handler_function(message.text)
+	bot.send_message(message.chat.id, text)
 
 def main():
-	global help_message
-	dict_of_funcs = {"start":(start, "Приветствие"), "weather":(weather, "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"),
-	"photo":(photo, "Получить свежую фотку с Марса, но не в hd :/"), "earth":(earth, "Фотка Земли со спуника НАСА"), "rover":(rover, "Фотки с ровера какого-то"),
-	"help":(help, "Функция HELP поможет вам всегда")}
-	help_message = ""
-	for func in dict_of_funcs:
-		if(func not in ('main', 'error_handler')):
-			help_message+= f"{func} —— {dict_of_funcs[func][1]}\n"
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
 		try:
 			function = dict_of_funcs[function_name][0]
-			function(message)
+			output = function()
+			type_and_reply(message.chat.id, *output)
 		except KeyError:
 			bot.send_message(message.chat.id, "Неизвестная команда. Напишите команду '/help' для списка команд")
+		except:
+			pass
 	bot.infinity_polling(True)
-
-def error_handler(func):
-	try:
-		func()
-	except Exception as error:
-		#bot.send_message(message.chat.id, f"Произошла ошибка: {error}")
-		pass
 
 if __name__ == '__main__':
 	main()
