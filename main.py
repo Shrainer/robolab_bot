@@ -1,53 +1,47 @@
 import telebot
 from types import FunctionType
+from functions import *
 
 token = 'token'
 bot = telebot.TeleBot(token)
 
-def start(message, description = "Приветствие"):
-	bot.send_message(message.chat.id, "Привет, спасибо, что написал мне)))")
+def error_handler(func):
+	def wrapper(*args):
+		try:
+			func(*args)
+		except Exception as error:
+			print(f"Произошла ошибка: {error}")
+	return wrapper
 
-def weather(message, description = "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"):
-	average_temperature = get_weather()
-	bot.send_message(message.chat.id, f"Сегогдняшняя средняя температура на Марсе: {average_temperature}C")
+def type_and_reply(chat_id, text, step_handler):
+	message = bot.send_message(chat_id, text)
+	if(step_handler):
+		global handler_function
+		handler_function = step_handler
+		bot.register_next_step_handler(message, register_step)
 
-def photo(message, description = "Получить свежую фотку с Марса, но не в hd :/"):
-	url_to_media = get_media()
-	bot.send_message(message.chat.id, url_to_media)
-
-def help(message, description = "Функция HELP поможет вам всегда"):
-	global help_message
-	bot.send_message(message.chat.id, help_message)
+@error_handler
+def register_step(message):
+	global handler_function
+	text = handler_function(message)
+	bot.reply_to(message, text)
 
 def main():
-	dict_of_funcs = {}
-	description_position = 0
-	globals_copy = globals().copy()
-	for key in globals_copy:
-		if(isinstance(globals_copy[key], FunctionType)):
-			dict_of_funcs[key] = globals_copy[key].__defaults__
-	help_message = ""
-	for func in dict_of_funcs:
-		if(func not in ('main', 'error_handler')):
-			help_message+= f"{func} —— {dict_of_funcs[func][description_position]}\n"
-	from nasa_api import get_photo, get_weather
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
-		try:
-			function = globals_copy[function_name]
-			function(message)
-		except KeyError:
-			bot.send_message(message.chat.id, "Неизвестная команда. Напишите команду '/help' для списка команд")
+		if(message.from_user.id in registered_users.keys()) or (message.from_user.username == "LasichAndGigond") or (function_name == "register"):
+			try:
+				function = dict_of_funcs[function_name][0]
+				output = function()
+				type_and_reply(message.chat.id, *output)
+			except KeyError:
+				bot.send_message(message.chat.id, "Неизвестная команда. Напишите команду '/help' для списка команд")
+			except:
+				pass
+		else:
+			bot.send_message(message.chat.id, "Ты не зарегистрирован, чтобы я с тобой общался, напиши '/register'")
 	bot.infinity_polling(True)
 
-def error_handler(func):
-	try:
-		func()
-	except Exception as error:
-		#bot.send_message(message.chat.id, f"Произошла ошибка: {error}")
-		pass
-
 if __name__ == '__main__':
-	@error_handler
 	main()
