@@ -1,40 +1,25 @@
-import telebot
-from types import FunctionType
-from functions import *
+import telebot, nasapy, functions
 
 token = 'token'
 bot = telebot.TeleBot(token)
 
-def error_handler(func):
-	def wrapper(*args):
-		try:
-			func(*args)
-		except Exception as error:
-			print(f"Произошла ошибка: {error}")
-	return wrapper
-
-def type_and_reply(chat_id, text, step_handler):
-	message = bot.send_message(chat_id, text)
-	if(step_handler):
-		global handler_function
-		handler_function = step_handler
-		bot.register_next_step_handler(message, register_step)
-
-@error_handler
-def register_step(message):
-	global handler_function
-	text = handler_function(message)
-	bot.reply_to(message, text)
+api_key = 'key'
+api = nasapy.Nasa(key = api_key)
 
 def main():
+	registered_users = {}
+	with open("users.txt", "r") as file:
+	    for line in file.readlines():
+	        id, name = line.rstrip('\n').split()
+	        registered_users[int(id)] = name
+	funcs = functions.functions_class(bot, api, api_key, telebot.types.ReplyKeyboardRemove(), registered_users)
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
 		if(message.from_user.id in registered_users.keys()) or (message.from_user.username == "LasichAndGigond") or (function_name == "register"):
 			try:
-				function = dict_of_funcs[function_name][0]
-				output = function()
-				type_and_reply(message.chat.id, *output)
+				function = funcs._dict_of_funcs[function_name][0]
+				function(message)
 			except KeyError:
 				bot.send_message(message.chat.id, "Неизвестная команда. Напишите команду '/help' для списка команд")
 			except:
@@ -45,3 +30,5 @@ def main():
 
 if __name__ == '__main__':
 	main()
+
+#F
