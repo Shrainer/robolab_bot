@@ -1,18 +1,23 @@
-import requests, json
+import requests, json, os
 from time import strftime, gmtime, time
 from random import random, randint, choice
 
 class functions_class():
-    def __init__(self, bot, api, api_key, default_markup, registered_users):
-        self._default_markup = default_markup
+    def __init__(self, bot, api, api_key, types, registered_users):
+        self._types = types
+        self._default_markup = self._types.ReplyKeyboardRemove()
         self._bot = bot
         self._api = api
         self._api_key = api_key
         self._registered_users = registered_users
+        self._info_list = {'Шестнадцатеричниые цифры': f'{os.getcwd()}/16.png', 'Степени двойки': f'{os.getcwd()}/Step2.png',
+        'Веса информации': f'{os.getcwd()}/BBKMT.png', 'Максимальное число': f'{os.getcwd()}/max.png'}
+        self._physics_list = ()
         self._dict_of_funcs = {"start":(self.start, "Приветствие"), "weather":(self.get_weather, "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"),
         "photo":(self.get_media, "Получить свежую фотку дня, но не в hd :/"), "earth":(self.earth_photo, "Фотка Земли со спуника НАСА"), "rover":(self.rover_photo, "Фотки с ровера какого-то"),
         "help":(self.help, "Функция HELP поможет вам всегда"),
-        "random":(self.random_number, "Рандом"), "rock":(self.RPS, "Играть в игру"), "register":(self.register_user, "Регистрация")}
+        "random":(self.random_number, "Рандом"), "rock":(self.RPS, "Играть в игру"),
+        "register":(self.register_user, "Регистрация"), "info":(self.get_info, "Подсказки для школы")}
         self._help_message = ""
         for func in self._dict_of_funcs:
             self._help_message+= f"/{func} —— {self._dict_of_funcs[func][1]}\n"
@@ -26,8 +31,8 @@ class functions_class():
     	return wrapper
 
     @error_handler
-    def register_handler(self, message, function):
-    	function(message)
+    def register_handler(self, message, function, *args):
+    	function(message, *args)
 
     def start(self, message):
         self._bot.send_message(message.chat.id, "Привет, спасибо, что написал мне)))", reply_markup = self._default_markup)
@@ -96,7 +101,8 @@ class functions_class():
             photo_name = epic_photos[random_index]['image']
             url_to_image = f"https://epic.gsfc.nasa.gov/archive/natural/{year}/{month}/{day}/jpg/{photo_name}.jpg"
             self._bot.send_message(message.chat.id,  f"Отправил фотографии за {date}\n\n{url_to_image}", reply_markup = self._default_markup)
-    def rover_photo(self, messsage, date = strftime("%Y-%m-%d", gmtime()), counter = 1):
+
+    def rover_photo(self, message, date = strftime("%Y-%m-%d", gmtime()), counter = 1):
         url = f"https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date={date}&api_key={self._api_key}"
         result = json.loads(requests.get(url).text)
         photos = result['photos']
@@ -107,6 +113,27 @@ class functions_class():
             list_of_url = [photos[i]['img_src'] for i in range(random_num, random_num + 3)]
             string = "\n\n".join(list_of_url)
             self._bot.send_message(message.chat.id, f"Это фотографии от {date} \n\n {string}", reply_markup = self._default_markup)
+
+    def get_info(self, message):
+        def handler(message):
+            if(message.text == "Информатика"):
+                list_of_choice = self._info_list
+            else:
+                list_of_choice = self._physics_list
+            self._bot.send_message(message.chat.id, "Обновляю варианты...", reply_markup=self._default_markup)
+            markup = self._types.ReplyKeyboardMarkup()
+            markup.add(*list(list_of_choice.keys()))
+            self._bot.send_message(message.chat.id, "Что именно узнать?", reply_markup=markup)
+            self._bot.register_next_step_handler(message, self.register_handler, self.send_info, list_of_choice)
+        markup = self._types.ReplyKeyboardMarkup()
+        markup.add("Физика", "Информатика")
+        self._bot.send_message(message.chat.id, "По физике или по информатике?", reply_markup=markup)
+        self._bot.register_next_step_handler(message, self.register_handler, handler)
+
+    def send_info(self, message, list_of_choice):
+        with open(list_of_choice[message.text], 'rb') as image:
+            self._bot.send_photo(message.chat.id, image, reply_markup=self._default_markup)
+
     def help(self, message):
         self._bot.send_message(message.chat.id, self._help_message, reply_markup = self._default_markup)
 
