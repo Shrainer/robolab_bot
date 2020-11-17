@@ -1,18 +1,18 @@
-import requests, json, os
+import requests, json
 from time import strftime, gmtime, time
 from random import random, randint, choice
 
 class functions_class():
-    def __init__(self, bot, api, api_key, types, registered_users):
+    def __init__(self, bot, api, api_key, types, registered_users, info_list, physics_list):
         self._types = types
         self._default_markup = self._types.ReplyKeyboardRemove()
         self._bot = bot
         self._api = api
         self._api_key = api_key
         self._registered_users = registered_users
-        self._info_list = {'Шестнадцатеричниые цифры': f'{os.getcwd()}/16.png', 'Степени двойки': f'{os.getcwd()}/Step2.png',
-        'Веса информации': f'{os.getcwd()}/BBKMT.png', 'Максимальное число': f'{os.getcwd()}/max.png'}
-        self._physics_list = ()
+        self._bibl = {'Биты': 0, 'Байты': 3, 'Килобиты': 10, 'Килобайты': 13, 'Мегабиты': 20, 'Мегабайты': 23, 'Гигабиты': 30, 'Гигабайты': 33, 'Терабиты': 40, 'Терабайты': 43}
+        self._info_list = info_list
+        self._physics_list = physics_list
         self._dict_of_funcs = {"start":(self.start, "Приветствие"), "weather":(self.get_weather, "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"),
         "photo":(self.get_media, "Получить свежую фотку дня, но не в hd :/"), "earth":(self.earth_photo, "Фотка Земли со спуника НАСА"), "rover":(self.rover_photo, "Фотки с ровера какого-то"),
         "help":(self.help, "Функция HELP поможет вам всегда"),
@@ -119,6 +119,17 @@ class functions_class():
             list_of_url = [photos[i]['img_src'] for i in range(random_num, random_num + 3)]
             string = "\n\n".join(list_of_url)
             self._bot.send_message(message.chat.id, f"Это фотографии от {date} \n\n {string}", reply_markup = self._default_markup)
+    """
+    def binary_calc(self, message):
+        def handler(message):
+            input = self._bibl[message.text]
+            self._bot.send_message(message.chat.id, "Во что?",reply_markup=markup)
+            self._bot.register_next_step_handler(message, self._register_handler, self.calc_result, input)
+    markup = self._types.ReplyKeyboardMarkup()
+    markup.add(*self._bibl)
+    self._bot.send_message(message.chat.id, "Из чего?", reply_markup=markup)
+    bot.register_next_step_handler(message, self.register_handler, handler)
+    """
 
     def get_info(self, message):
         def handler(message):

@@ -1,9 +1,9 @@
-import telebot, nasapy, functions
+import telebot, nasapy, os, functions
 
-token = 'token'
+token = os.environ.get('telebot_token')
 bot = telebot.TeleBot(token)
 
-api_key = 'key'
+api_key = os.environ.get('nasapy_token')
 api = nasapy.Nasa(key = api_key)
 
 def main():
@@ -12,7 +12,10 @@ def main():
 	    for line in file.readlines():
 	        id, name = line.rstrip('\n').split()
 	        registered_users[int(id)] = name
-	funcs = functions.functions_class(bot, api, api_key, telebot.types.ReplyKeyboardRemove(), registered_users)
+	info_list = {'Шестнадцатеричниые цифры': f'{os.getcwd()}/16.png', 'Степени двойки': f'{os.getcwd()}/Step2.png',
+	'Веса информации': f'{os.getcwd()}/BBKMT.png', 'Максимальное число': f'{os.getcwd()}/max.png'}
+	physics_list = ()
+	funcs = functions.functions_class(bot, api, api_key, telebot.types, registered_usersm info_list, physics_list)
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
@@ -22,13 +25,11 @@ def main():
 				function(message)
 			except KeyError:
 				bot.send_message(message.chat.id, "Неизвестная команда. Напишите команду '/help' для списка команд")
-			except:
-				pass
+			except Exception as e:
+				print(e)
 		else:
 			bot.send_message(message.chat.id, "Ты не зарегистрирован, чтобы я с тобой общался, напиши '/register'")
 	bot.infinity_polling(True)
 
 if __name__ == '__main__':
 	main()
-
-#F
