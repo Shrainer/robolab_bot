@@ -21,18 +21,22 @@ class functions_class():
         self._help_message = ""
         for func in self._dict_of_funcs:
             self._help_message+= f"/{func} —— {self._dict_of_funcs[func][1]}\n"
-
+    """
     def error_handler(func):
-    	def wrapper(*args):
-    		try:
-    			func(*args)
-    		except Exception as error:
-    			print(f"Произошла ошибка: {error}")
-    	return wrapper
+        def wrapper(*args):
+            try:
+                func(*args)
+            except Exception as error:
+                print(f"Произошла ошибка: {error}")
+        return wrapper
+    """
 
-    @error_handler
     def register_handler(self, message, function, *args):
-    	function(message, *args)
+        try:
+            function(message, *args)
+        except Exception as error:
+            print(f"Произошла ошибка: {error}")
+            self._bot.send_message(message.chat.id, "Что-то пошло не так(", reply_markup = self._default_markup)
 
     def start(self, message):
         self._bot.send_message(message.chat.id, "Привет, спасибо, что написал мне)))", reply_markup = self._default_markup)
@@ -52,7 +56,9 @@ class functions_class():
             else:
                 self._bot.send_message(chat_id, "Ты неправильно играешь, не знаешь, как правильно писать надо?", reply_markup = self._default_markup)
         bot_choice = choice(tuple(combinations.keys()))
-        self._bot.send_message(message.chat.id, "Я сделал свой выбор, твоя очередь!", reply_markup = self._default_markup)
+        markup = self._types.ReplyKeyboardMarkup()
+        markup.add("Камень", "Ножницы", "Бумага")
+        self._bot.send_message(message.chat.id, "Я сделал свой выбор, твоя очередь!", reply_markup = markup)
         self._bot.register_next_step_handler(message, self.register_handler, handler)
 
     def random_number(self, message):
