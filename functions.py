@@ -126,21 +126,21 @@ class functions_class():
             user_input = self._bibl[message.text]
             self._bot.send_message(message.chat.id, "Во что?",reply_markup=markup)
             self._bot.register_next_step_handler(message, self.register_handler, self.binary_calc_input, user_input)
-    markup = self._types.ReplyKeyboardMarkup()
-    markup.add(*self._bibl)
-    self._bot.send_message(message.chat.id, "Из чего?", reply_markup=markup)
-    bot.register_next_step_handler(message, self.register_handler, handler)
+        markup = self._types.ReplyKeyboardMarkup()
+        markup.add(*self._bibl)
+        self._bot.send_message(message.chat.id, "Из чего?", reply_markup=markup)
+        self._bot.register_next_step_handler(message, self.register_handler, handler)
 
     def binary_calc_input(self, message, user_input):
         output = self._bibl[message.text]
         self._bot.send_message(message.chat.id, "Сколько?", reply_markup=self._default_markup)
-        self_bot.register_next_step_handler(message, self.register_handler, self._binary_calc_result, user_input, output)
+        self._bot.register_next_step_handler(message, self.register_handler, self.binary_calc_result, user_input, output)
 
-    def binary_calc_result(message, user_input, output):
+    def binary_calc_result(self, message, user_input, output):
         output_send = float(message.text)
         output_send = 2**user_input * output_send / 2**output
         output_send = str(output_send) + " = 2^" + str(user_input) + " * " + str(output_send)
-        bot.send_message(message.chat.id, output_send)
+        self._bot.send_message(message.chat.id, output_send)
 
     def get_info(self, message):
         def handler(message):

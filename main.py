@@ -15,7 +15,7 @@ def main():
 	info_list = {'Шестнадцатеричниые цифры': f'{os.getcwd()}/16.png', 'Степени двойки': f'{os.getcwd()}/Step2.png',
 	'Веса информации': f'{os.getcwd()}/BBKMT.png', 'Максимальное число': f'{os.getcwd()}/max.png'}
 	physics_list = ()
-	funcs = functions.functions_class(bot, api, api_key, telebot.types, registered_usersm info_list, physics_list)
+	funcs = functions.functions_class(bot, api, api_key, telebot.types, registered_users, info_list, physics_list)
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
