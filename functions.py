@@ -17,7 +17,8 @@ class functions_class():
         "photo":(self.get_media, "Получить свежую фотку дня, но не в hd :/"), "earth":(self.earth_photo, "Фотка Земли со спуника НАСА"), "rover":(self.rover_photo, "Фотки с ровера какого-то"),
         "help":(self.help, "Функция HELP поможет вам всегда"),
         "random":(self.random_number, "Рандом"), "rock":(self.RPS, "Играть в игру"),
-        "register":(self.register_user, "Регистрация"), "info":(self.get_info, "Подсказки для школы")}
+        "register":(self.register_user, "Регистрация"), "info":(self.get_info, "Подсказки для школы"),
+        "calc":(self.binary_calc, "Бинарный калькулятор")}
         self._help_message = ""
         for func in self._dict_of_funcs:
             self._help_message+= f"/{func} —— {self._dict_of_funcs[func][1]}\n"
@@ -119,17 +120,27 @@ class functions_class():
             list_of_url = [photos[i]['img_src'] for i in range(random_num, random_num + 3)]
             string = "\n\n".join(list_of_url)
             self._bot.send_message(message.chat.id, f"Это фотографии от {date} \n\n {string}", reply_markup = self._default_markup)
-    """
+
     def binary_calc(self, message):
         def handler(message):
-            input = self._bibl[message.text]
+            user_input = self._bibl[message.text]
             self._bot.send_message(message.chat.id, "Во что?",reply_markup=markup)
-            self._bot.register_next_step_handler(message, self._register_handler, self.calc_result, input)
+            self._bot.register_next_step_handler(message, self.register_handler, self.binary_calc_input, user_input)
     markup = self._types.ReplyKeyboardMarkup()
     markup.add(*self._bibl)
     self._bot.send_message(message.chat.id, "Из чего?", reply_markup=markup)
     bot.register_next_step_handler(message, self.register_handler, handler)
-    """
+
+    def binary_calc_input(self, message, user_input):
+        output = self._bibl[message.text]
+        self._bot.send_message(message.chat.id, "Сколько?", reply_markup=self._default_markup)
+        self_bot.register_next_step_handler(message, self.register_handler, self._binary_calc_result, user_input, output)
+
+    def binary_calc_result(message, user_input, output):
+        output_send = float(message.text)
+        output_send = 2**user_input * output_send / 2**output
+        output_send = str(output_send) + " = 2^" + str(user_input) + " * " + str(output_send)
+        bot.send_message(message.chat.id, output_send)
 
     def get_info(self, message):
         def handler(message):
