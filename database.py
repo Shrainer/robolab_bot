@@ -4,7 +4,7 @@ conn = sqlite3.connect("mydatabase.db")
 cursor = conn.cursor()
 
 
-def creature():
+def create():
     cursor.execute("""CREATE TABLE UsersZXC
                 (user_id integer, user_name text, level integer)
                 """)
@@ -12,7 +12,6 @@ def creature():
                 (media_name text, media_url text)
                 """)
     conn.commit()
-
 
 def add_user(id, name, level):
     cursor.execute(f"""INSERT INTO UsersZXC (user_id, user_name, level)
@@ -26,5 +25,8 @@ def add_media(name, url):
                   )""")
     conn.commit()
 
+def select(table):
+    for i in cursor.execute(f"SELECT * FROM {table}"):
+        yield i
 
-add_info()
+create()
