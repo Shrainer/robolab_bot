@@ -3,13 +3,13 @@ from time import strftime, gmtime, time
 from random import random, randint, choice
 
 class functions_class():
-    def __init__(self, bot, api, api_key, types, registered_users, info_list, physics_list):
+    def __init__(self, bot, api, api_key, types, database, info_list, physics_list):
         self._types = types
         self._default_markup = self._types.ReplyKeyboardRemove()
         self._bot = bot
         self._api = api
+        self._database = database
         self._api_key = api_key
-        self._registered_users = registered_users
         self._bibl = {'Биты': 0, 'Байты': 3, 'Килобиты': 10, 'Килобайты': 13, 'Мегабиты': 20, 'Мегабайты': 23, 'Гигабиты': 30, 'Гигабайты': 33, 'Терабиты': 40, 'Терабайты': 43}
         self._info_list = info_list
         self._physics_list = physics_list
@@ -22,6 +22,7 @@ class functions_class():
         self._help_message = ""
         for func in self._dict_of_funcs:
             self._help_message+= f"/{func} —— {self._dict_of_funcs[func][1]}\n"
+
     """
     def error_handler(func):
         def wrapper(*args):
@@ -31,6 +32,10 @@ class functions_class():
                 print(f"Произошла ошибка: {error}")
         return wrapper
     """
+
+    def get_user_names(self):
+        names = list(self._database("select", "UsersZXC", "user_name"))
+        return names
 
     def register_handler(self, message, function, *args):
         try:
@@ -78,10 +83,8 @@ class functions_class():
             user_id = message.from_user.id
             chat_id = message.chat.id
             text = message.text
-            if(user_id not in self._registered_users):
-                with open("users.txt", "a") as file:
-                    file.write(f"{user_id} {text.split()[0]}\n")
-                self._registered_users[user_id] = text
+            if(user_id not in self.get_user_names()):
+                self._database.add_user(user_id, text, 1)
                 self._bot.send_message(chat_id, "Я тебя зарегал вроде как", reply_markup = self._default_markup)
             else:
                 self._bot.send_message(chat_id, "Ты уже зареган", reply_markup = self._default_markup)
