@@ -17,7 +17,7 @@ def main():
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
-		if(message.from_user.id in funcs.get_user_names()) or (message.from_user.username == "LasichAndGigond") or (function_name == "register"):
+		if(message.from_user.id in funcs.get_user_ids()) or (message.from_user.username == "LasichAndGigond") or (function_name == "register"):
 			try:
 				function = funcs._dict_of_funcs[function_name][0]
 				function(message)

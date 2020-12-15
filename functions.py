@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, numpy
 from time import strftime, gmtime, time
 from random import random, randint, choice
 
@@ -33,9 +33,12 @@ class functions_class():
         return wrapper
     """
 
-    def get_user_names(self):
-        names = list(self._database("select", "UsersZXC", "user_name"))
-        return names
+    def get_user_ids(self):
+        ids = numpy.array(list(self._database("SELECT user_id from UsersZXC")), int)
+        if(ids.shape[0] != 0):
+            ids = ids[0:][0]
+        print(ids)
+        return ids
 
     def register_handler(self, message, function, *args):
         try:
@@ -83,8 +86,10 @@ class functions_class():
             user_id = message.from_user.id
             chat_id = message.chat.id
             text = message.text
-            if(user_id not in self.get_user_names()):
-                self._database.add_user(user_id, text, 1)
+            if(user_id not in self.get_user_ids()):
+                self._database(f"""INSERT INTO UsersZXC (user_id, user_name, level)
+                              VALUES ({user_id}, '{text}', 1)
+                              """)
                 self._bot.send_message(chat_id, "Я тебя зарегал вроде как", reply_markup = self._default_markup)
             else:
                 self._bot.send_message(chat_id, "Ты уже зареган", reply_markup = self._default_markup)
