@@ -17,10 +17,13 @@ def main():
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
-		if(message.from_user.id in funcs.get_user_ids()) or (message.from_user.username == "LasichAndGigond") or (function_name == "register"):
+		if(message.from_user.id in funcs.get_user_ids()) or (function_name == "register"):
 			try:
-				function = funcs._dict_of_funcs[function_name][0]
-				function(message)
+				if(funcs.get_user_level(message.from_user.id) <= funcs._dict_of_funcs[function_name][2]):
+					function = funcs._dict_of_funcs[function_name][0]
+					function(message)
+				else:
+					bot.send_message(message.chat.id, "У тебя нету прав!")
 			except KeyError:
 				bot.send_message(message.chat.id, "Неизвестная команда. Напишите команду '/help' для списка команд")
 			except Exception as e:

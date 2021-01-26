@@ -13,12 +13,13 @@ class functions_class():
         self._bibl = {'Биты': 0, 'Байты': 3, 'Килобиты': 10, 'Килобайты': 13, 'Мегабиты': 20, 'Мегабайты': 23, 'Гигабиты': 30, 'Гигабайты': 33, 'Терабиты': 40, 'Терабайты': 43}
         self._info_list = info_list
         self._physics_list = physics_list
-        self._dict_of_funcs = {"start":(self.start, "Приветствие"), "weather":(self.get_weather, "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать"),
-        "photo":(self.get_media, "Получить свежую фотку дня, но не в hd :/"), "earth":(self.earth_photo, "Фотка Земли со спуника НАСА"), "rover":(self.rover_photo, "Фотки с ровера какого-то"),
-        "help":(self.help, "Функция HELP поможет вам всегда"),
-        "random":(self.random_number, "Рандом"), "rock":(self.RPS, "Играть в игру"),
-        "register":(self.register_user, "Регистрация"), "info":(self.get_info, "Подсказки для школы"),
-        "calc":(self.binary_calc, "Бинарный калькулятор")}
+        self._dict_of_funcs = {"start":(self.start, "Приветствие", 3), "weather":(self.get_weather, "Получить данные о погоде на Марсе, которые мы сами не знаем, как обрабатывать", 3),
+        "photo":(self.get_media, "Получить свежую фотку дня, но не в hd :/", 3), "earth":(self.earth_photo, "Фотка Земли со спуника НАСА", 3), "rover":(self.rover_photo, "Фотки с ровера какого-то", 3),
+        "help":(self.help, "Функция HELP поможет вам всегда", 3),
+        "random":(self.random_number, "Рандом", 3), "rock":(self.RPS, "Играть в игру", 3),
+        "register":(self.register_user, "Регистрация", 3), "info":(self.get_info, "Подсказки для школы", 3),
+        "calc":(self.binary_calc, "Бинарный калькулятор", 3), "register_switch":(self.register_switch, "Включить или отключить регистрацию", 1)}
+        self._is_register_open = True
         self._help_message = ""
         for func in self._dict_of_funcs:
             self._help_message+= f"/{func} —— {self._dict_of_funcs[func][1]}\n"
@@ -35,10 +36,16 @@ class functions_class():
 
     def get_user_ids(self):
         ids = numpy.array(list(self._database("SELECT user_id from UsersZXC")), int)
-        if(ids.shape[0] != 0):
-            ids = ids[0:][0]
-        print(ids)
+        ids = list(ids.flat[0:])
         return ids
+
+    def get_user_name(self, id):
+        name = list(self._database(f"SELECT user_name from UsersZXC WHERE user_id = {id}"))[0][0]
+        return name
+
+    def get_user_level(self, id):
+        level = list(self._database(f"SELECT level from UsersZXC WHERE user_id = {id}"))[0][0]
+        return level
 
     def register_handler(self, message, function, *args):
         try:
@@ -48,7 +55,7 @@ class functions_class():
             self._bot.send_message(message.chat.id, "Что-то пошло не так(", reply_markup = self._default_markup)
 
     def start(self, message):
-        self._bot.send_message(message.chat.id, "Привет, спасибо, что написал мне)))", reply_markup = self._default_markup)
+        self._bot.send_message(message.chat.id, f"Привет, спасибо, что написал мне, {self.get_user_name(message.from_user.id)}", reply_markup = self._default_markup)
 
     def RPS(self, message, combinations = {"камень":"ножницы","ножницы":"бумага","бумага":"камень"}):
         def handler(message):
@@ -93,8 +100,15 @@ class functions_class():
                 self._bot.send_message(chat_id, "Я тебя зарегал вроде как", reply_markup = self._default_markup)
             else:
                 self._bot.send_message(chat_id, "Ты уже зареган", reply_markup = self._default_markup)
-        self._bot.send_message(message.chat.id, "Напиши мне, как тебя будут звать", reply_markup = self._default_markup)
-        self._bot.register_next_step_handler(message, self.register_handler, handler)
+        if(self._is_register_open):
+            self._bot.send_message(message.chat.id, "Напиши мне, как тебя будут звать", reply_markup = self._default_markup)
+            self._bot.register_next_step_handler(message, self.register_handler, handler)
+        else:
+            self._bot.send_message(message.chat.id, "Регистрация на данный момент закрыта", reply_markup = self._default_markup)
+
+    def register_switch(self, message):
+        self._is_register_open = not self._is_register_open
+        self._bot.send_message(message.chat.id, "Регистрация снова открыта!" if self._is_register_open else "Администратор, вы закрыли регистрацию в бота", reply_markup = self._default_markup)
 
     def get_media(self, message):
         media = self._api.picture_of_the_day()

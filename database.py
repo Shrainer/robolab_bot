@@ -1,5 +1,4 @@
 import sqlite3
-from contextlib import closing
 
 class database():
     def __init__(self):
