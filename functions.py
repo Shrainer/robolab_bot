@@ -18,7 +18,8 @@ class functions_class():
         "help":(self.help, "Функция HELP поможет вам всегда", 3),
         "random":(self.random_number, "Рандом", 3), "rock":(self.RPS, "Играть в игру", 3),
         "register":(self.register_user, "Регистрация", 3), "info":(self.get_info, "Подсказки для школы", 3),
-        "calc":(self.binary_calc, "Бинарный калькулятор", 3), "register_switch":(self.register_switch, "Включить или отключить регистрацию", 1)}
+        "calc":(self.binary_calc, "Бинарный калькулятор", 3), "register_switch":(self.register_switch, "Включить или отключить регистрацию", 1),
+        "delete_user":(self.delete_user, "Удалить пользователя из БД", 1)}
         self._is_register_open = True
         self._help_message = ""
         for func in self._dict_of_funcs:
@@ -95,7 +96,7 @@ class functions_class():
             text = message.text
             if(user_id not in self.get_user_ids()):
                 self._database(f"""INSERT INTO UsersZXC (user_id, user_name, level)
-                              VALUES ({user_id}, '{text}', 1)
+                              VALUES ({user_id}, '{text}', 3)
                               """)
                 self._bot.send_message(chat_id, "Я тебя зарегал вроде как", reply_markup = self._default_markup)
             else:
@@ -109,6 +110,17 @@ class functions_class():
     def register_switch(self, message):
         self._is_register_open = not self._is_register_open
         self._bot.send_message(message.chat.id, "Регистрация снова открыта!" if self._is_register_open else "Администратор, вы закрыли регистрацию в бота", reply_markup = self._default_markup)
+
+    def delete_user(self, message):
+        def handler(message):
+            to_delete = message.text
+            self._database(f"DELETE FROM UsersZXC WHERE user_name = '{to_delete}'")
+            self._bot.send_message(message.chat.id, "Удалили человечка из датабазы()", reply_markup = self._default_markup)
+        all_names = numpy.array(list(self._database("SELECT user_name FROM UsersZXC")), str).flat[0:]
+        markup = self._types.ReplyKeyboardMarkup()
+        markup.add(*all_names)
+        self._bot.send_message(message.chat.id, "Кого надобно вам удалить?", reply_markup = markup)
+        self._bot.register_next_step_handler(message, self.register_handler, handler)
 
     def get_media(self, message):
         media = self._api.picture_of_the_day()

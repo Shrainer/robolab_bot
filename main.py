@@ -17,7 +17,7 @@ def main():
 	@bot.message_handler(content_types = ['text'])
 	def handler(message):
 		function_name = message.text[1:]
-		if(message.from_user.id in funcs.get_user_ids()) or (function_name == "register"):
+		if(message.from_user.id in funcs.get_user_ids()):
 			try:
 				if(funcs.get_user_level(message.from_user.id) <= funcs._dict_of_funcs[function_name][2]):
 					function = funcs._dict_of_funcs[function_name][0]
@@ -29,7 +29,10 @@ def main():
 			except Exception as e:
 				print(e)
 		else:
-			bot.send_message(message.chat.id, "Ты не зарегистрирован, чтобы я с тобой общался, напиши '/register'")
+			if(function_name != "register"):
+				bot.send_message(message.chat.id, "Ты не зарегистрирован, чтобы я с тобой общался, напиши '/register'")
+			else:
+				funcs._dict_of_funcs[function_name][0](message)
 	bot.infinity_polling(True)
 
 if __name__ == '__main__':
